@@ -1,14 +1,32 @@
-const express = require('express');
-const router = express.Router();
+const { Router } = require("express");
+const { userMiddleware } = require("../middleware/middleware");
+const { purchaseModel, courseModel } = require("../db")
+const courseRouter = Router();
 
-router.post('/purchase', function(req, res) {
-    res.send("Course purchase");
-});
+courseRouter.post("/purchase", userMiddleware, async function(req, res) {
+    const userId = req.userId;
+    const courseId = req.body.courseId;
 
-router.get('/', function(req, res) {
-    res.send("Course list");
-});
+    // should check that the user has actually paid the price
+    await purchaseModel.create({
+        userId,
+        courseId
+    })
+
+    res.json({
+        message: "You have successfully bought the course"
+    })
+})
+
+courseRouter.get("/preview", async function(req, res) {
+    
+    const courses = await courseModel.find({});
+
+    res.json({
+        courses
+    })
+})
 
 module.exports = {
-    courseRouter: router
-};
+    courseRouter: courseRouter
+}
